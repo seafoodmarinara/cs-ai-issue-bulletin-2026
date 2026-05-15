@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CS AI Issue Bulletin · #cs-ai-issue-reporting</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7eed4;
+  --ink: #1a1f24;
+  --ink-soft: #524634;
+  --ink-faint: #8a7a5e;
+  --rule: rgba(80,55,20,0.14);
+  --card-shadow:
+    0 3px 6px rgba(50,30,5,0.22),
+    0 14px 30px rgba(50,30,5,0.28);
+  --card-shadow-hover:
+    0 10px 20px rgba(40,20,0,0.38),
+    0 28px 56px rgba(40,20,0,0.42),
+    0 56px 96px rgba(40,20,0,0.30);
+
+  /* Earthy sophisticated paper colors */
+  --paper-open: #e5d589;       /* dusty mustard yellow */
+  --paper-partial: #d9a87a;    /* terracotta */
+  --paper-resolved: #a8c4a2;   /* sage */
+  --paper-urgent: #dc8a8a;     /* dusty rose-red */
+  --paper-info: #8fa4b8;       /* dusty slate-blue */
+
+  /* Status pill text colors — darker shades of each paper */
+  --pill-open: #6b5b15;
+  --pill-partial: #7a3f15;
+  --pill-resolved: #3a5a3a;
+  --pill-urgent: #7d2b2b;
+  --pill-info: #2d4154;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  /* Cork texture — 3 layers: coarse chunks, medium grain, fine speckle */
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='0.22' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.26 0 0 0 0 0.14 0 0 0 0 0.04 0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23b)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.30 0 0 0 0 0.18 0 0 0 0 0.06 0 0 0 0.90 0'/></filter><rect width='100%25' height='100%25' filter='url(%23c)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='s'><feTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.17 0 0 0 0 0.10 0 0 0 0 0.03 0 0 0 0.75 0'/></filter><rect width='100%25' height='100%25' filter='url(%23s)'/></svg>");
+  background-size: 420px 420px, 240px 240px, 140px 140px;
+  background-attachment: fixed;
+  color: var(--ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+}
+
+.page { max-width: 1380px; margin: 0 auto; padding: 48px 32px 80px; }
+
+/* Header */
+.page-header {
+  margin-bottom: 36px;
+  text-align: center;
+}
+.page-header .stat-line,
+.page-header .subtitle {
+  /* inherit center from parent */
+}
+.page-header .legend {
+  /* legend is inline-flex; centers naturally because parent is text-align: center */
+}
+/* Title block — width matches the subtitle line below it */
+.title-block {
+  display: inline-block;
+  text-align: center;
+}
+.page-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;              /* fills the title-block, which is sized by the subtitle */
+  position: relative;
+  height: 1.15em;           /* explicit height since the marquee child is absolutely positioned */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+}
+.marquee-track {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  white-space: nowrap;
+  animation: marquee-right 5s linear infinite;
+  will-change: left;
+}
+@keyframes marquee-right {
+  from { left: -100%; }
+  to   { left: 100%; }
+}
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; left: 0; }
+}
+.subtitle {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
+.subtitle .sep { margin: 0 8px; color: var(--ink-faint); }
+.stat-line {
+  margin: 14px 0 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+.stat-line strong { color: var(--ink); font-weight: 600; }
+.stat-line .dot { color: var(--ink-faint); margin: 0 6px; }
+
+/* Legend */
+.legend {
+  margin-top: 16px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(80,55,20,0.10);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(80,55,20,0.05);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.10), inset 0 0 0 1px rgba(0,0,0,0.04);
+  flex-shrink: 0;
+}
+.legend-swatch.s-urgent { background: var(--paper-urgent); }
+.legend-swatch.s-open { background: var(--paper-open); }
+.legend-swatch.s-partial { background: var(--paper-partial); }
+.legend-swatch.s-resolved { background: var(--paper-resolved); }
+.legend-swatch.s-info { background: var(--paper-info); }
+
+/* Sticky control bar — search, filters, sort all in one strip that sticks to top while scrolling */
+.sticky-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  margin: 0 -32px 24px;
+  padding: 14px 32px;
+  background: rgba(243,230,196,0.82);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  border-bottom: 1px solid rgba(80,55,20,0.14);
+  box-shadow: 0 6px 14px -10px rgba(0,0,0,0.20);
+}
+.sticky-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Legacy controls layout — preserved for compatibility */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--ink);
+}
+.search-box::placeholder { color: var(--ink-faint); }
+.search-box:focus {
+  outline: none;
+  border-color: var(--ink-soft);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+}
+
+.chip-group { display: flex; gap: 4px; }
+.chip {
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  border-radius: 999px;
+  font-size: 12.5px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.chip:hover { color: var(--ink); border-color: rgba(0,0,0,0.15); }
+.chip.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.sort-select {
+  padding: 6px 28px 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: 12.5px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%235a5f66' d='M5 6L0 0h10z'/%3E%3C/svg%3E") no-repeat right 10px center;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--ink);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Advanced filters (legacy block, no longer used as wrapper but inner styles still apply) */
+.advanced-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  justify-content: center;
+}
+.filter-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(80,55,20,0.10);
+  border-radius: 8px;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+.filter-group input[type="date"],
+.filter-group select {
+  padding: 4px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--ink);
+}
+.filter-group input[type="date"] {
+  min-width: 130px;
+}
+.filter-clear {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 6px;
+  text-decoration: underline;
+  font-family: inherit;
+}
+.filter-clear:hover { color: var(--ink); }
+
+/* Board — masonry via CSS columns */
+.board {
+  column-count: 3;
+  column-gap: 24px;
+}
+@media (max-width: 1080px) { .board { column-count: 2; } }
+@media (max-width: 680px) { .board { column-count: 1; } }
+
+/* Sticky note */
+.note {
+  background: var(--paper-open);
+  border-radius: 6px;
+  padding: 20px 22px;
+  margin: 0 0 24px 0;
+  box-shadow: var(--card-shadow);
+  break-inside: avoid;
+  display: inline-block;
+  width: 100%;
+  cursor: pointer;
+  transition:
+    transform 0.28s cubic-bezier(.2,.7,.3,1),
+    box-shadow 0.28s ease,
+    filter 0.30s ease,
+    opacity 0.30s ease;
+  position: relative;
+}
+
+/* When any note is being hovered, blur and dim the others — focus mode */
+.board:hover .note:not(:hover):not(.expanded) {
+  filter: blur(3px) saturate(0.85);
+  opacity: 0.42;
+  transform: scale(0.985);
+}
+.note.color-open { background: var(--paper-open); }
+.note.color-partial { background: var(--paper-partial); }
+.note.color-resolved { background: var(--paper-resolved); }
+.note.color-urgent { background: var(--paper-urgent); }
+.note.color-info { background: var(--paper-info); }
+
+.note.is-resolved {
+  opacity: 0.72;
+}
+.note:hover {
+  transform: rotate(0deg) translateY(-10px) scale(1.07) !important;
+  box-shadow: var(--card-shadow-hover);
+  opacity: 1;
+  filter: none;
+  z-index: 20;
+}
+.note.expanded {
+  transform: rotate(0deg) !important;
+  box-shadow: var(--card-shadow-hover);
+  opacity: 1;
+  z-index: 3;
+}
+
+/* Note head */
+.note-head { display: flex; gap: 10px; align-items: flex-start; }
+.note-title {
+  flex: 1;
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.note-pill {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.55);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.note.color-open .note-pill { color: var(--pill-open); }
+.note.color-partial .note-pill { color: var(--pill-partial); }
+.note.color-resolved .note-pill { color: var(--pill-resolved); }
+.note.color-urgent .note-pill { color: var(--pill-urgent); }
+.note.color-info .note-pill { color: var(--pill-info); }
+
+/* Note meta line */
+.note-meta {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(0,0,0,0.55);
+}
+.note-meta .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(0,0,0,0.3); }
+.note-meta .count {
+  font-weight: 600;
+  color: rgba(0,0,0,0.7);
+}
+
+/* Note body - hidden by default, shown when expanded */
+.note-body {
+  display: none;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+.note.expanded .note-body { display: block; }
+
+.note-desc {
+  font-size: 13.5px;
+  color: rgba(0,0,0,0.78);
+  line-height: 1.5;
+  margin: 0 0 14px 0;
+}
+
+.fix-section {
+  background: rgba(255,255,255,0.5);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+.fix-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(0,0,0,0.55);
+  display: block;
+  margin-bottom: 4px;
+}
+.fix-text {
+  font-size: 13px;
+  color: rgba(0,0,0,0.8);
+  line-height: 1.5;
+}
+.fix-attribution {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: rgba(0,0,0,0.55);
+  font-style: italic;
+}
+.fix-attribution strong {
+  color: rgba(0,0,0,0.75);
+  font-weight: 600;
+  font-style: normal;
+}
+
+.reports {
+  border-top: 1px dashed rgba(0,0,0,0.12);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+.reports-heading {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: rgba(0,0,0,0.5);
+  margin-bottom: 8px;
+}
+.report-row {
+  font-size: 12.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 0;
+  border-bottom: 1px dotted rgba(0,0,0,0.08);
+}
+.report-row:last-child { border-bottom: none; }
+.report-row .top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.report-row .who {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 12.5px;
+}
+.report-row .when {
+  color: rgba(0,0,0,0.5);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+}
+.report-row .snippet {
+  color: rgba(0,0,0,0.7);
+  line-height: 1.45;
+  margin-top: 2px;
+}
+.report-row .links {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.report-row .links a {
+  font-size: 11px;
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.75);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+.report-row .links a:hover {
+  background: rgba(0,0,0,0.12);
+  color: var(--ink);
+}
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+/* Expand hint */
+.expand-hint {
+  margin-top: 12px;
+  font-size: 11px;
+  color: rgba(0,0,0,0.45);
+  font-weight: 500;
+}
+.note.expanded .expand-hint { display: none; }
+
+/* Top driver tag — pinned to top-right corner of highest-count cards */
+.top-driver-tag {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: linear-gradient(135deg, #c1272d, #9a1a1f);
+  color: #fff8e7;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.15);
+  z-index: 5;
+  transform: rotate(8deg);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.top-driver-tag::before {
+  content: '⚠️';
+  font-size: 11px;
+}
+
+/* High-volume but already resolved — muted sage badge, no red */
+.high-volume-tag {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: linear-gradient(135deg, #6b8b6e, #4a6e4d);
+  color: #f1ece0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 4px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.12);
+  z-index: 5;
+  transform: rotate(6deg);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.high-volume-tag::before {
+  content: '✓';
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* Slack thread link in meta */
+.slack-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: rgba(0,0,0,0.55);
+  text-decoration: none;
+  padding: 2px 0;
+  transition: color 0.15s ease;
+}
+.slack-link:hover {
+  color: rgba(0,0,0,0.85);
+  text-decoration: underline;
+}
+
+/* Ping button + badge */
+.ping-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+.ping-btn {
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.55);
+  color: rgba(0,0,0,0.72);
+  border: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ping-btn:hover {
+  background: rgba(255,255,255,0.85);
+  color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+.ping-btn.cooldown {
+  background: rgba(0,0,0,0.04);
+  color: rgba(0,0,0,0.45);
+  border-color: rgba(0,0,0,0.05);
+  cursor: not-allowed;
+  transform: none;
+}
+.ping-btn.cooldown:hover {
+  background: rgba(0,0,0,0.04);
+  transform: none;
+  box-shadow: none;
+}
+.ping-badge {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(220,40,40,0.10);
+  color: #991b1b;
+  border: 1px solid rgba(220,40,40,0.18);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  animation: ping-pulse 2s ease-in-out 2;
+}
+@keyframes ping-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220,40,40,0.0); }
+  50% { box-shadow: 0 0 0 6px rgba(220,40,40,0.18); }
+}
+
+/* Name-picker modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20,15,5,0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 26px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.30);
+}
+.modal h2 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+.modal p {
+  margin: 0 0 16px 0;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+}
+.modal select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  margin-bottom: 16px;
+}
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.modal-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--rule);
+  background: #fff;
+  color: var(--ink);
+}
+.modal-btn.primary {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.modal-btn.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Toast for ping result */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #1a1f24;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 200;
+  transition: transform 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  max-width: 90vw;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: #b62324; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div class="title-block">
+      <h1>
+        <span class="marquee-track">CS AI Issue Bulletin</span>
+      </h1>
+      <p class="subtitle">
+        <span>#cs-ai-issue-reporting</span>
+        <span class="sep">·</span>
+        <span>Apr 13 – May 13, 2026</span>
+        <span class="sep">·</span>
+        <span>Snapshot May 13, 2026</span>
+      </p>
+    </div>
+    <p class="stat-line" id="stat-line"></p>
+    <div class="legend" aria-label="Sticky-note color legend">
+      <span class="legend-item"><span class="legend-swatch s-urgent"></span>Urgent</span>
+      <span class="legend-item"><span class="legend-swatch s-open"></span>Open</span>
+      <span class="legend-item"><span class="legend-swatch s-partial"></span>Partial fix</span>
+      <span class="legend-item"><span class="legend-swatch s-resolved"></span>Resolved</span>
+      <span class="legend-item"><span class="legend-swatch s-info"></span>Not a bug</span>
+    </div>
+  </header>
+
+  <div class="sticky-bar">
+    <div class="sticky-bar-inner">
+      <input id="search" class="search-box" type="search" placeholder="Search…" />
+      <div class="chip-group" id="status-chips">
+        <button class="chip active" data-filter="all">All</button>
+        <button class="chip" data-filter="urgent">Urgent</button>
+        <button class="chip" data-filter="open">Open</button>
+        <button class="chip" data-filter="resolved">Resolved</button>
+      </div>
+      <select id="sort" class="sort-select">
+        <option value="newest">Newest first</option>
+        <option value="count">Most reported</option>
+        <option value="oldest">Oldest first</option>
+        <option value="urgent">Urgent first</option>
+      </select>
+      <div class="filter-group">
+        <span class="filter-label">Date</span>
+        <input type="date" id="date-from" aria-label="From date">
+        <span style="color:var(--ink-faint)">–</span>
+        <input type="date" id="date-to" aria-label="To date">
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Agent</span>
+        <select id="reporter-filter" aria-label="Filter by agent">
+          <option value="">All agents</option>
+        </select>
+      </div>
+      <button class="filter-clear" id="filter-clear">Clear</button>
+    </div>
+  </div>
+
+  <div id="board" class="board"></div>
+</div>
+
+<!-- Name picker modal -->
+<div id="name-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h2>Who's pinging?</h2>
+    <p>Pick your name once — we'll remember it on this browser for future pings.</p>
+    <select id="name-select" aria-label="Pick your name">
+      <option value="">— Choose your name —</option>
+    </select>
+    <div class="modal-actions">
+      <button class="modal-btn" id="name-cancel">Cancel</button>
+      <button class="modal-btn primary" id="name-confirm" disabled>Continue</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+// =================================================================
+// EMBEDDED SNAPSHOT DATA — same as before
+// =================================================================
+const CLUSTERS = [
+  {
+    title: "Incorrect refund amount or scope",
+    description: "Ashley processes a refund — but for the wrong amount, or refunds a transaction that was actually declined / shouldn't have been refunded, or cancels more than the customer requested.",
+    fix: "Partially resolved. Ashley has been updated to recognize failed/declined transactions and to take note of pending payments before refunding. Resolution depends on the specific edge case — newer reports still come in.",
+    fix_by: "Rico",
+    status: "partial",
+    reports: [
+      { date: "2026-05-04", reporter: "Patriz Brigoli", urgent: true, resolved: false,
+        snippet: "Customer requested to cancel the subscription, but Ashley canceled both the subscription and the order.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69f803e9b32644c3cac74599/event/69f80b889ce2db1544b0c617"] },
+      { date: "2026-05-02", reporter: "Leizel Cabilan", urgent: false, resolved: false,
+        snippet: "Customer thought she was charged 3x and wanted $206 refunded. Ashley refunded extras instead of explaining the charges.",
+        links: ["https://raicom.kustomerapp.com/app/customers/68b1161b0cffba04ad41204d/event/69f4b0ba9ce2db1544961f46"] },
+      { date: "2026-04-30", reporter: "Leizel Cabilan", urgent: false, resolved: true,
+        snippet: "Customer requested $87.95 refund. Ashley processed it even though the amount was declined due to insufficient funds — order became fully refunded and canceled.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69673a6d835e50825935b31f/event/69e8687f9ce2db15444b9a0f"] },
+      { date: "2026-04-29", reporter: "Leizel Cabilan", urgent: false, resolved: false,
+        snippet: "Ashley refunded $59.95 instead of just $47.95 for the 2 items (line-item removal issue).",
+        links: ["https://raicom.kustomerapp.com/app/customers/69f0dab340715e6f00883e90/event/69f0e04b9ce2db15443f84ad"] },
+      { date: "2026-04-27", reporter: "Shai", urgent: false, resolved: true,
+        snippet: "Ashley refunded an order, but the one-time-offer payment was still pending — order total became $0.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69ef7bb8d2643f8cfa722fc0/event/69ef7d079ce2db154490580b"] }
+    ]
+  },
+  {
+    title: "Pause subscription escalated even though already processed",
+    description: "Ashley escalates pause requests to a human, claiming an error, when the subscription has actually been paused successfully via the Seal API.",
+    fix: "Resolved — Diego deployed a fix. Full subscription data (including PAUSED status and pause start/end dates) is now included in the API response so Ashley can detect successful pauses. An updated fix was deployed after additional reports.",
+    fix_by: "Diego",
+    status: "resolved",
+    reports: [
+      { date: "2026-04-18", reporter: "Leizel Cabilan", urgent: false, resolved: true,
+        snippet: "Ashley escalated to manually pause the membership, but the pause was already processed.",
+        links: ["https://raicom.kustomerapp.com/app/customers/6999f5ac36177e23697c2f9d/event/69e267fe9ce2db15444dcf32"] },
+      { date: "2026-04-14", reporter: "Beth Pareja", urgent: false, resolved: true,
+        snippet: "Customer requested to change pause from 2 months to 3 months. Subscription was already paused for 3 months — escalation could have been avoided.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69dd61009fea7990622ca6e6/event/69dd62289ce2db154490b04d"] },
+      { date: "2026-04-14", reporter: "Patriz Brigoli (added in thread)", urgent: false, resolved: true,
+        snippet: "Additional pause-already-processed ticket.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69b77ce75349b5a572699fa5/event/69dd27269ce2db15446c4a9d"] },
+      { date: "2026-04-15", reporter: "Patriz Brigoli (added in thread)", urgent: false, resolved: true,
+        snippet: "Additional pause-already-processed ticket.",
+        links: ["https://raicom.kustomerapp.com/app/customers/689fb8fe5e96be3758de00f2/event/69dece9a9ce2db1544127432"] },
+      { date: "2026-04-15", reporter: "Julio Romero Jr (added in thread)", urgent: false, resolved: true,
+        snippet: "Additional pause-already-processed ticket.",
+        links: ["https://raicom.kustomerapp.com/app/customers/698e82f3a1d8fe91587b8fd3/event/69df09579ce2db154421aa3b"] },
+      { date: "2026-04-16", reporter: "Julio Romero Jr (added in thread)", urgent: false, resolved: true,
+        snippet: "Ashley escalated saying she got an error pausing the subscription but it was paused properly.",
+        links: ["https://raicom.kustomerapp.com/app/customers/699a1fda33d2d4b29ee97f54/event/69e2b0959ce2db15447bbd4f"] }
+    ]
+  },
+  {
+    title: "Feedback SMS triggered before order is delivered",
+    description: "Customers get an automated SMS asking for product feedback while the order is still in transit or not yet received.",
+    fix: "No documented fix yet. Ryan escalated to Sean for SMS auto-responder review. Suggested timing change: trigger only after tracking status is 'Delivered' (with possible 'a few days/weeks after delivered' buffer).",
+    fix_by: "Pending Sean's review (escalated by Ryan)",
+    status: "open",
+    reports: [
+      { date: "2026-04-24", reporter: "Julio Romero Jr", urgent: false, resolved: false,
+        snippet: "SMS asking for feedback triggered while the order was still in transit. Should it be sent days/weeks after delivery?",
+        links: ["https://raicom.kustomerapp.com/app/customers/69c7251976b184f6e8124127/event/69eaa94a9ce2db15443b28c6"] },
+      { date: "2026-04-22", reporter: "Zwingli Diamond", urgent: false, resolved: false,
+        snippet: "Ashley sent feedback request before the customer received the package. Should trigger only on tracking status 'Delivered'.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69c54fccef60c98125c5fe6b/event/69e8dcf09ce2db15446666a7"] }
+    ]
+  },
+  {
+    title: "Ashley sends incorrect product / shipping info",
+    description: "Ashley tells customers things that are factually wrong about products or fulfillment — e.g. that all orders ship from the US warehouse, or that a product comes in bottles when it ships in pouches.",
+    fix: "No documented fix yet. Multiple reports for the warehouse claim — including a follow-up where Ashley said an order with China Post tracking 'ships from the US.'",
+    status: "open",
+    reports: [
+      { date: "2026-05-09", reporter: "Dianne (added in thread)", urgent: false, resolved: false,
+        snippet: "Ashley said order is in transit with China Post and that all orders ship from the US.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69f4d5be4059965ecb75d2f7/event/69fd34309ce2db15442c2763"] },
+      { date: "2026-04-30", reporter: "Dianne (added in thread)", urgent: false, resolved: false,
+        snippet: "Additional warehouse-misinfo ticket.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69aa857ffc11ccc071724975/event/69f3225a9ce2db1544d726e5"] },
+      { date: "2026-04-25", reporter: "Dianne", urgent: false, resolved: false,
+        snippet: "Ashley telling customers that *all* orders ship from the US warehouse.",
+        links: [
+          "https://raicom.kustomerapp.com/app/customers/69c71aec68691d2cfb9f2f7f/event/69eb033c9ce2db15445112db",
+          "https://raicom.kustomerapp.com/app/customers/69e7bca4cf0a577bfe739372/event/69e8c38a9ce2db154457d319"
+        ] },
+      { date: "2026-04-15", reporter: "Zwingli Diamond", urgent: false, resolved: false,
+        snippet: "Ashley said no return is needed and offered a 10% refund — but the product is not from our store.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69b13d6f7083704cc12a7133/event/69de80f79ce2db1544e87665"] },
+      { date: "2026-04-07", reporter: "Dianne (historical context)", urgent: false, resolved: false,
+        snippet: "Ashley said Vitamin D3 & K2 comes in bottles, but it ships in a pouch/pack.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69c679d4be02070923dc4b35/event/69d256e960b5fbedeb95f026"] }
+    ]
+  },
+  {
+    title: "Support tool card out of sync with subscription state",
+    description: "The support tool / Kustomer card shows a subscription as 'Active' when it has actually been cancelled successfully.",
+    fix: "Workaround: force sync the subscription (the circle-arrows / refresh action on the card). Sean noted the underlying cause is likely Seal state desync or a missed Seal webhook. Root-cause investigation in progress.",
+    fix_by: "Sean (workaround); root-cause investigation pending",
+    status: "partial",
+    reports: [
+      { date: "2026-05-13", reporter: "Martin Henrick Bombon", urgent: false, resolved: false,
+        snippet: "Initially thought Ashley was failing to cancel — but the subscription IS cancelled, the support tool card just shows 'Active'.",
+        links: [
+          "https://raicom.kustomerapp.com/app/customers/69dd88b81302bfbdad84e638/event/6a0270410407ca63b8db1106",
+          "https://raicom.kustomerapp.com/app/customers/69def1a8c80be8c94ad0ff30/event/6a0270c70407ca63b8db6f9d",
+          "https://raicom.kustomerapp.com/app/customers/69c71e78fd0f2e24919522c8/event/6a03c1130407ca63b8610c10"
+        ] }
+    ]
+  },
+  {
+    title: "Unnecessary escalation for tasks AI could handle",
+    description: "Ashley/Iris escalate tickets to the CS team for tasks they were actually able to complete, or for situations that could be handled automatically.",
+    fix: "Mixed status. Iris feedback-merge case has been included so Iris can respond directly. VM (voicemail) tickets are planned to be reduced. The $150 refund max-cap escalation is intended behavior but flagged for review.",
+    fix_by: "Rico",
+    status: "partial",
+    reports: [
+      { date: "2026-04-24", reporter: "Beth Pareja", urgent: false, resolved: false,
+        snippet: "Sample VM (voicemail) tickets being escalated by Ashley to the CS team (5 tickets).",
+        links: [
+          "https://raicom.kustomerapp.com/app/customers/69ea80224c190cd9a5c4a3c6/event/69ea8022e4de1c222cc31898",
+          "https://raicom.kustomerapp.com/app/customers/69ea83593bdfc47b56c0d708/event/69ea83591fc7264133d6ad10",
+          "https://raicom.kustomerapp.com/app/customers/69c52017df3c94df5bae6684/event/69ea87e435344bfdc5fbec49",
+          "https://raicom.kustomerapp.com/app/customers/69bcfd33f5629673f8c2c203/event/69ea8afa4412b0e93235e4c9",
+          "https://raicom.kustomerapp.com/app/customers/69c52017df3c94df5bae6684/event/69ea8ba7a5852d1b05e20467"
+        ] },
+      { date: "2026-04-17", reporter: "Julio Romero Jr", urgent: false, resolved: false,
+        snippet: "Ashley escalated a refund for double-check, but processed it properly. Cause: $150 max refund cap was hit. Under review for improvement.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69a040e32247abab72324e44/event/69dbd1af9ce2db154411f1bb"] },
+      { date: "2026-04-17", reporter: "Zwingli Diamond", urgent: false, resolved: true,
+        snippet: "Customer feedback ticket not merged on account, only a note from Iris. (Plus 2 more added in thread.)",
+        links: [
+          "https://raicom.kustomerapp.com/app/customers/69e11b7dae80229f31f203a8/event/69e11b7d9ce2db1544ced7fa",
+          "https://raicom.kustomerapp.com/app/customers/69e148c64a678c0a6fae575a/event/69e148c69ce2db1544eae3cc",
+          "https://raicom.kustomerapp.com/app/customers/69e170c052ff2f2eaba1ab25/event/69e170c09ce2db1544016ea9"
+        ] }
+    ]
+  },
+  {
+    title: "Ashley continues follow-ups after customer requests to stop",
+    description: "Customer has indicated multiple times that they do not need assistance, but Ashley keeps sending follow-up messages — escalating into customer frustration.",
+    fix: "No fix documented yet.",
+    status: "open",
+    reports: [
+      { date: "2026-05-02", reporter: "Ann", urgent: false, resolved: false,
+        snippet: "Customer indicated multiple times they did not need assistance; Ashley continued sending follow-ups. Customer asked her to stop.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69ad734a09f4dce7aab0f1ff/event/69f5db089ce2db15440a0ba1"] }
+    ]
+  },
+  {
+    title: "35% lifetime discount widget error",
+    description: "Error when trying to process the 35% lifetime discount through the standard widget.",
+    fix: "Workaround: apply the discount through the Seal website instead. Diego noted this scenario usually happens when the customer has changed their credit card info — the widget can't process the change but Seal can.",
+    fix_by: "Diego",
+    status: "partial",
+    reports: [
+      { date: "2026-04-30", reporter: "Dianne", urgent: false, resolved: false,
+        snippet: "Getting an error when trying to process the 35% lifetime discount.",
+        links: ["https://raicom.kustomerapp.com/app/customers/6921b885b13aa906a6dbadd7/event/69f2be5f9ce2db1544ac6d16"] }
+    ]
+  },
+  {
+    title: "Old tickets reopening due to 1-year snooze expiring",
+    description: "Tickets from a year ago are being reopened because the old snooze duration was applied for exactly one year.",
+    fix: "Resolved. Rico backtracked the 1-year snooze and updated it to avoid the auto-unsnooze. Reporters were told to re-snooze any tickets currently assigned to them.",
+    fix_by: "Rico",
+    status: "resolved",
+    reports: [
+      { date: "2026-05-12", reporter: "Shai", urgent: false, resolved: true,
+        snippet: "Tickets from a year ago are reopening — 2nd time getting assigned tickets with this concern.",
+        links: ["https://raicom.kustomerapp.com/app/customers/67be0cd932572c9ab7ed944c/event/6814d5e8fa9aa75ca441bce4"] }
+    ]
+  },
+  {
+    title: "Stuck tickets in inbox (not snoozed after Ashley response)",
+    description: "~90 tickets accumulated open in the inbox. Many were merged tickets that weren't snoozed; others had Ashley responses but weren't snoozed so they stayed in the inbox. Some were also not routed to the CS inbox at all.",
+    fix: "Partial: Rico cleaned up the open merged tickets. Recurring root-cause fix still being investigated. Beth normally cleans these up daily but was on rest days.",
+    fix_by: "Rico (cleanup); recurring fix in progress",
+    status: "partial",
+    reports: [
+      { date: "2026-05-12", reporter: "Ann", urgent: false, resolved: false,
+        snippet: "~90 open tickets — most already responded to by Ashley but not snoozed; others not routed to CS inbox.",
+        links: [] }
+    ]
+  },
+  {
+    title: "Ashley confuses order numbers in the conversation",
+    description: "When a customer has multiple orders, Ashley keeps referencing the wrong order number, causing confusion.",
+    fix: "No fix documented yet.",
+    status: "open",
+    reports: [
+      { date: "2026-04-18", reporter: "Leizel Cabilan", urgent: false, resolved: false,
+        snippet: "Customer message was about order TN87865083 (already delivered, wants to return), but Ashley kept talking about order TN82842443.",
+        links: ["https://raicom.kustomerapp.com/app/customers/69ad861885fafef646b7b87b/event/69e111b39ce2db1544c7f0d5"] }
+    ]
+  },
+  {
+    title: "Non-standard retention offers (intentional A/B test)",
+    description: "Ashley is offering retention deals outside the standard menu (e.g. 35% lifetime discount + 3-month pause, when the standard options are 6-month pause OR 20% lifetime).",
+    fix: "Not a bug — this is intentional. Ryan and Rico are testing retention strategies to optimize customer satisfaction and business metrics. Expect non-standard offers for the next few weeks.",
+    fix_by: "Ryan & Rico (intentional A/B test)",
+    status: "info",
+    reports: [
+      { date: "2026-04-14", reporter: "Beth Pareja", urgent: false, resolved: false,
+        snippet: "Ashley offered a 3-month pause along with a 35% lifetime discount — outside the standard retention options.",
+        links: ["https://raicom.kustomerapp.com/app/customers/6988daf7764e0ea83809049b/event/69dd71fd9ce2db154499f096"] }
+    ]
+  }
+];
+const SNAPSHOT_DATE = "2026-05-13";
+
+// =================================================================
+// PING FEATURE CONFIG
+// =================================================================
+// Backend URL — set this after deploying the Cloudflare Worker.
+// If empty, the page runs in DEMO MODE: ping UI works locally but no Slack message is sent.
+const WORKER_URL = "https://cs-ai-bulletin-pinger.angel-dfa.workers.dev";
+
+const SLACK_CHANNEL_ID = "C08TK72GBRD";
+const SLACK_WORKSPACE = "raicom";  // subdomain for raicom.slack.com — used to build thread URLs
+const BULLETIN_URL = "https://seafoodmarinara.github.io/cs-ai-issue-bulletin-30days-ping/";
+
+const TEAM_MEMBERS = [
+  "Angel", "Ann", "Beth", "Dianne", "Diego",
+  "Enrico (Rico)", "Julio", "Leizel", "Martin",
+  "Patriz", "Ryan", "Sean", "Shai", "Zwingli"
+];
+
+// Each cluster's "most recent parent message" Slack TS — pings reply inside this thread.
+// Keyed by cluster title.
+const CLUSTER_SLACK_TS = {
+  "Incorrect refund amount or scope": "1777865508.048029",
+  "Pause subscription escalated even though already processed": "1776447419.672419",
+  "Feedback SMS triggered before order is delivered": "1776987413.554239",
+  "Ashley sends incorrect product / shipping info": "1777046412.793209",
+  "Support tool card out of sync with subscription state": "1778633488.995679",
+  "Unnecessary escalation for tasks AI could handle": "1776979143.475049",
+  "Ashley continues follow-ups after customer requests to stop": "1777721007.099229",
+  "35% lifetime discount widget error": "1777546321.624399",
+  "Old tickets reopening due to 1-year snooze expiring": "1778515790.052839",
+  "Stuck tickets in inbox (not snoozed after Ashley response)": "1778569461.672759",
+  "Ashley confuses order numbers in the conversation": "1776442848.613779",
+  "Non-standard retention offers (intentional A/B test)": "1776121576.175519"
+};
+
+// Per-report Slack TSs — used to link each individual report row to its own Slack thread.
+// Keyed by "cluster_title|date|reporter" since each combination is unique.
+// "Added in thread" reports point to their cluster's parent thread TS.
+const REPORT_SLACK_TS = {
+  // Incorrect refund amount or scope
+  "Incorrect refund amount or scope|2026-05-04|Patriz Brigoli": "1777865508.048029",
+  "Incorrect refund amount or scope|2026-05-02|Leizel Cabilan": "1777652834.794799",
+  "Incorrect refund amount or scope|2026-04-30|Leizel Cabilan": "1777488446.569139",
+  "Incorrect refund amount or scope|2026-04-29|Leizel Cabilan": "1777396704.147169",
+  "Incorrect refund amount or scope|2026-04-27|Shai": "1777304209.795169",
+  // Pause subscription escalated
+  "Pause subscription escalated even though already processed|2026-04-18|Leizel Cabilan": "1776447419.672419",
+  "Pause subscription escalated even though already processed|2026-04-14|Beth Pareja": "1776123343.751369",
+  "Pause subscription escalated even though already processed|2026-04-14|Patriz Brigoli (added in thread)": "1776123343.751369",
+  "Pause subscription escalated even though already processed|2026-04-15|Patriz Brigoli (added in thread)": "1776123343.751369",
+  "Pause subscription escalated even though already processed|2026-04-15|Julio Romero Jr (added in thread)": "1776123343.751369",
+  "Pause subscription escalated even though already processed|2026-04-16|Julio Romero Jr (added in thread)": "1776123343.751369",
+  // Feedback SMS
+  "Feedback SMS triggered before order is delivered|2026-04-24|Julio Romero Jr": "1776987413.554239",
+  "Feedback SMS triggered before order is delivered|2026-04-22|Zwingli Diamond": "1776873042.667189",
+  // Product / shipping info
+  "Ashley sends incorrect product / shipping info|2026-05-09|Dianne (added in thread)": "1777046412.793209",
+  "Ashley sends incorrect product / shipping info|2026-04-30|Dianne (added in thread)": "1777046412.793209",
+  "Ashley sends incorrect product / shipping info|2026-04-25|Dianne": "1777046412.793209",
+  "Ashley sends incorrect product / shipping info|2026-04-15|Zwingli Diamond": "1776191691.663219",
+  "Ashley sends incorrect product / shipping info|2026-04-07|Dianne (historical context)": "1775570259.780789",
+  // Support tool sync
+  "Support tool card out of sync with subscription state|2026-05-13|Martin Henrick Bombon": "1778633488.995679",
+  // Unnecessary escalation
+  "Unnecessary escalation for tasks AI could handle|2026-04-24|Beth Pareja": "1776979143.475049",
+  "Unnecessary escalation for tasks AI could handle|2026-04-17|Julio Romero Jr": "1776381115.194789",
+  "Unnecessary escalation for tasks AI could handle|2026-04-17|Zwingli Diamond": "1776363490.432589",
+  // Follow-ups
+  "Ashley continues follow-ups after customer requests to stop|2026-05-02|Ann": "1777721007.099229",
+  // 35% discount
+  "35% lifetime discount widget error|2026-04-30|Dianne": "1777546321.624399",
+  // Old tickets reopening
+  "Old tickets reopening due to 1-year snooze expiring|2026-05-12|Shai": "1778515790.052839",
+  // Stuck inbox
+  "Stuck tickets in inbox (not snoozed after Ashley response)|2026-05-12|Ann": "1778569461.672759",
+  // Order numbers
+  "Ashley confuses order numbers in the conversation|2026-04-18|Leizel Cabilan": "1776442848.613779",
+  // Retention test
+  "Non-standard retention offers (intentional A/B test)|2026-04-14|Beth Pareja": "1776121576.175519"
+};
+function getReportSlackTs(clusterTitle, report) {
+  const key = clusterTitle + "|" + report.date + "|" + report.reporter;
+  return REPORT_SLACK_TS[key] || null;
+}
+
+const COOLDOWN_MS = 24 * 60 * 60 * 1000;  // 24h
+const AUTO_CLEAR_MS = 7 * 24 * 60 * 60 * 1000;  // 7 days
+
+// =================================================================
+// Rendering
+// =================================================================
+let filterStatus = 'all';
+let sortBy = 'newest';
+let searchTerm = '';
+let filterDateFrom = '';   // ISO date string YYYY-MM-DD
+let filterDateTo = '';
+let filterReporter = '';
+
+// Build Slack thread URL from channel + parent TS.
+// Format: https://<workspace>.slack.com/archives/<channel_id>/p<ts_no_dot>
+function slackThreadUrl(channelId, ts) {
+  if (!channelId || !ts) return '';
+  const noDot = String(ts).replace('.', '');
+  return `https://${SLACK_WORKSPACE}.slack.com/archives/${channelId}/p${noDot}`;
+}
+
+// Build the list of unique reporter names from the data (strip "(added in thread)" / "(historical context)" suffixes).
+function collectReporters() {
+  const set = new Set();
+  for (const c of CLUSTERS) {
+    for (const r of c.reports) {
+      const clean = (r.reporter || '').replace(/\s*\([^)]+\)\s*$/, '').trim();
+      if (clean) set.add(clean);
+    }
+  }
+  return Array.from(set).sort();
+}
+
+function reporterMatches(reporterField, selected) {
+  if (!selected) return true;
+  const clean = (reporterField || '').replace(/\s*\([^)]+\)\s*$/, '').trim();
+  return clean === selected;
+}
+
+// Identify high-volume clusters.
+//   - Open/Partial/Info clusters with 5+ reports → "Needs Attention" (urgent red ribbon)
+//   - Resolved clusters with 5+ reports → "Frequently reported" (muted sage badge)
+const NEEDS_ATTENTION_THRESHOLD = 5;
+function getTopDriverTitles(aggregated) {
+  if (!aggregated.length) return new Set();
+  // Only un-resolved clusters get the urgent ribbon
+  return new Set(
+    aggregated
+      .filter(c => c.count >= NEEDS_ATTENTION_THRESHOLD && c.status !== 'resolved')
+      .map(c => c.title)
+  );
+}
+function getHighVolumeResolvedTitles(aggregated) {
+  if (!aggregated.length) return new Set();
+  return new Set(
+    aggregated
+      .filter(c => c.count >= NEEDS_ATTENTION_THRESHOLD && c.status === 'resolved')
+      .map(c => c.title)
+  );
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+function parseDate(s) {
+  if (!s) return null;
+  return new Date(s + 'T00:00:00');
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function humanAge(d, asOf) {
+  if (!d) return '';
+  const now = asOf || new Date();
+  const days = Math.floor((now.getTime() - d.getTime()) / (86400000));
+  if (days <= 0) return 'today';
+  if (days === 1) return '1d';
+  if (days < 7) return days + 'd';
+  if (days < 30) return Math.floor(days / 7) + 'w';
+  return Math.floor(days / 30) + 'mo';
+}
+function statusLabel(s) {
+  if (s === 'resolved') return 'Resolved';
+  if (s === 'partial') return 'Partial fix';
+  if (s === 'info') return 'Not a bug';
+  return 'Open';
+}
+function colorClass(c) {
+  // Urgent trumps everything
+  if (c.anyUrgent) return 'color-urgent';
+  if (c.status === 'resolved') return 'color-resolved';
+  if (c.status === 'partial') return 'color-partial';
+  if (c.status === 'info') return 'color-info';
+  return 'color-open';
+}
+function deterministicRotation(idx) {
+  // Pseudo-random but stable, between -1.5 and 1.5 degrees
+  const seeds = [1.1, -0.7, 0.5, -1.3, 0.9, -0.4, 1.4, -1.0, 0.3, -0.9, 1.2, -0.5];
+  return seeds[idx % seeds.length];
+}
+
+function aggregate(c, idx) {
+  const dates = c.reports.map(r => parseDate(r.date)).filter(Boolean);
+  const firstDate = dates.length ? new Date(Math.min(...dates.map(d => d.getTime()))) : null;
+  const lastDate = dates.length ? new Date(Math.max(...dates.map(d => d.getTime()))) : null;
+  const anyUrgent = c.reports.some(r => r.urgent);
+  return Object.assign({}, c, {
+    count: c.reports.length,
+    firstDate, lastDate, anyUrgent,
+    _idx: idx,
+  });
+}
+
+function updateStatLine() {
+  const totalReports = CLUSTERS.reduce((s, c) => s + c.reports.length, 0);
+  const open = CLUSTERS.filter(c => c.status === 'open').length;
+  const partial = CLUSTERS.filter(c => c.status === 'partial').length;
+  const resolved = CLUSTERS.filter(c => c.status === 'resolved').length;
+  const urgent = CLUSTERS.filter(c => c.reports.some(r => r.urgent)).length;
+  document.getElementById('stat-line').innerHTML =
+    `<strong>${totalReports}</strong> reports across <strong>${CLUSTERS.length}</strong> issues` +
+    `<span class="dot">·</span><strong>${urgent}</strong> urgent` +
+    `<span class="dot">·</span><strong>${open}</strong> open` +
+    `<span class="dot">·</span><strong>${partial}</strong> partial fix` +
+    `<span class="dot">·</span><strong>${resolved}</strong> resolved`;
+}
+
+function render() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  const aggregated = CLUSTERS.map(aggregate);
+
+  let displayed = aggregated.filter(c => {
+    if (filterStatus === 'urgent' && !c.anyUrgent) return false;
+    if (filterStatus === 'open' && (c.status === 'resolved' || c.status === 'info')) return false;
+    if (filterStatus === 'resolved' && c.status !== 'resolved') return false;
+    if (searchTerm) {
+      const hay = (c.title + ' ' + c.description + ' ' + c.fix + ' ' +
+        c.reports.map(r => r.reporter + ' ' + r.snippet).join(' ')).toLowerCase();
+      if (!hay.includes(searchTerm)) return false;
+    }
+    // Date range filter — cluster matches if ANY of its reports falls within range
+    if (filterDateFrom || filterDateTo) {
+      const from = filterDateFrom ? parseDate(filterDateFrom) : null;
+      const to = filterDateTo ? parseDate(filterDateTo) : null;
+      const hasInRange = c.reports.some(r => {
+        const d = parseDate(r.date);
+        if (!d) return false;
+        if (from && d < from) return false;
+        if (to && d > to) return false;
+        return true;
+      });
+      if (!hasInRange) return false;
+    }
+    // Reporter filter — cluster matches if ANY report was made by selected reporter
+    if (filterReporter) {
+      const hasReporter = c.reports.some(r => reporterMatches(r.reporter, filterReporter));
+      if (!hasReporter) return false;
+    }
+    return true;
+  });
+
+  // Compute high-volume sets for the FILTERED set
+  const topDriverTitles = getTopDriverTitles(displayed);              // unresolved + 5+ reports
+  const highVolumeResolvedTitles = getHighVolumeResolvedTitles(displayed);  // resolved + 5+ reports
+
+  if (sortBy === 'count') {
+    displayed.sort((a, b) => b.count - a.count || (b.lastDate?.getTime() || 0) - (a.lastDate?.getTime() || 0));
+  } else if (sortBy === 'newest') {
+    displayed.sort((a, b) => (b.lastDate?.getTime() || 0) - (a.lastDate?.getTime() || 0));
+  } else if (sortBy === 'oldest') {
+    displayed.sort((a, b) => (a.firstDate?.getTime() || 0) - (b.firstDate?.getTime() || 0));
+  } else if (sortBy === 'urgent') {
+    displayed.sort((a, b) => (b.anyUrgent ? 1 : 0) - (a.anyUrgent ? 1 : 0) || (b.lastDate?.getTime() || 0) - (a.lastDate?.getTime() || 0));
+  }
+
+  if (!displayed.length) {
+    board.innerHTML = '<div class="empty">No issues match the current filter.</div>';
+    return;
+  }
+  displayed.forEach((c, i) => board.appendChild(renderNote(c, i, topDriverTitles, highVolumeResolvedTitles)));
+}
+
+function renderNote(c, displayIdx, topDriverTitles, highVolumeResolvedTitles) {
+  const note = document.createElement('article');
+  let cls = 'note ' + colorClass(c);
+  if (c.status === 'resolved') cls += ' is-resolved';
+  note.className = cls;
+  const rot = deterministicRotation(c._idx);
+  note.style.transform = `rotate(${rot}deg)`;
+
+  const asOf = parseDate(SNAPSHOT_DATE);
+  const dateLabel = c.lastDate ? `${fmtDate(c.lastDate)} · ${humanAge(c.lastDate, asOf)} ago` : '—';
+
+  const isTopDriver = topDriverTitles && topDriverTitles.has(c.title);
+  const isHighVolumeResolved = highVolumeResolvedTitles && highVolumeResolvedTitles.has(c.title);
+  const slackTs = CLUSTER_SLACK_TS[c.title];
+  const threadUrl = slackTs ? slackThreadUrl(SLACK_CHANNEL_ID, slackTs) : '';
+
+  let head = `
+    ${isTopDriver ? `<span class="top-driver-tag" title="High-volume issue — needs attention">Needs Attention</span>` : ''}
+    ${isHighVolumeResolved ? `<span class="high-volume-tag" title="${c.count} reports — already resolved">Reported ${c.count}×</span>` : ''}
+    <div class="note-head">
+      <h3 class="note-title">${esc(c.title)}</h3>
+      <span class="note-pill">${statusLabel(c.status)}</span>
+    </div>
+    <div class="note-meta">
+      <span class="count">${c.count} report${c.count !== 1 ? 's' : ''}</span>
+      <span class="meta-dot"></span>
+      <span>${esc(dateLabel)}</span>
+      ${threadUrl ? `<span class="meta-dot"></span><a class="slack-link" href="${esc(threadUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">→ Latest Slack thread</a>` : ''}
+    </div>
+    <div class="ping-row" data-ping-row data-cluster-title="${esc(c.title)}"></div>
+  `;
+
+  // Hidden body
+  let reportsHtml = '';
+  if (c.reports.length) {
+    const sorted = [...c.reports].sort((a, b) =>
+      (parseDate(b.date)?.getTime() || 0) - (parseDate(a.date)?.getTime() || 0));
+    reportsHtml = `
+      <div class="reports">
+        <div class="reports-heading">Individual reports</div>
+        ${sorted.map(r => {
+          const d = parseDate(r.date);
+          const dateStr = d ? `${fmtDate(d)} · ${humanAge(d, asOf)} ago` : '—';
+          const reportSlackTs = getReportSlackTs(c.title, r);
+          const reportThreadUrl = reportSlackTs ? slackThreadUrl(SLACK_CHANNEL_ID, reportSlackTs) : '';
+          const kustomerHtml = (r.links || []).length
+            ? r.links.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Kustomer${r.links.length > 1 ? ' #' + (i+1) : ''} ↗</a>`).join('')
+            : '';
+          const slackHtml = reportThreadUrl
+            ? `<a href="${esc(reportThreadUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="background:rgba(74,93,158,0.10);color:#3a4d8a;">💬 Slack ↗</a>`
+            : '';
+          const linksHtml = (kustomerHtml + slackHtml) ||
+            '<span style="font-size:11px;color:rgba(0,0,0,0.4);font-style:italic;">no link</span>';
+          return `
+            <div class="report-row">
+              <div class="top">
+                <span class="who">${esc(r.reporter)}</span>
+                <span class="when">${esc(dateStr)}</span>
+              </div>
+              <div class="snippet">${esc(r.snippet)}</div>
+              <div class="links">${linksHtml}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  const body = `
+    <div class="note-body">
+      ${c.description ? `<p class="note-desc">${esc(c.description)}</p>` : ''}
+      ${c.fix ? `
+        <div class="fix-section">
+          <span class="fix-label">${c.status === 'info' ? 'Note' : 'Fix / Workaround'}</span>
+          <div class="fix-text">${esc(c.fix)}</div>
+          ${c.fix_by ? `<div class="fix-attribution">${c.status === 'info' ? 'Per' : 'Provided by'} <strong>${esc(c.fix_by)}</strong></div>` : ''}
+        </div>
+      ` : ''}
+      ${reportsHtml}
+    </div>
+    <div class="expand-hint">Tap to view details</div>
+  `;
+
+  note.innerHTML = head + body;
+
+  note.addEventListener('click', (e) => {
+    // Don't toggle when clicking a link
+    if (e.target.tagName === 'A') return;
+    note.classList.toggle('expanded');
+  });
+
+  return note;
+}
+
+function wireUp() {
+  document.getElementById('search').addEventListener('input', (e) => {
+    searchTerm = e.target.value.trim().toLowerCase();
+    render();
+  });
+  document.querySelectorAll('#status-chips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#status-chips .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      filterStatus = chip.getAttribute('data-filter');
+      render();
+    });
+  });
+  document.getElementById('sort').addEventListener('change', (e) => {
+    sortBy = e.target.value;
+    render();
+  });
+
+  // Date range filter
+  const dateFrom = document.getElementById('date-from');
+  const dateTo = document.getElementById('date-to');
+  if (dateFrom) {
+    dateFrom.addEventListener('change', (e) => {
+      filterDateFrom = e.target.value;
+      render();
+    });
+  }
+  if (dateTo) {
+    dateTo.addEventListener('change', (e) => {
+      filterDateTo = e.target.value;
+      render();
+    });
+  }
+
+  // Populate reporter dropdown
+  const reporterSel = document.getElementById('reporter-filter');
+  if (reporterSel) {
+    const reporters = collectReporters();
+    for (const name of reporters) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      reporterSel.appendChild(opt);
+    }
+    reporterSel.addEventListener('change', (e) => {
+      filterReporter = e.target.value;
+      render();
+    });
+  }
+
+  // Clear all advanced filters
+  const clearBtn = document.getElementById('filter-clear');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      filterDateFrom = '';
+      filterDateTo = '';
+      filterReporter = '';
+      if (dateFrom) dateFrom.value = '';
+      if (dateTo) dateTo.value = '';
+      if (reporterSel) reporterSel.value = '';
+      render();
+    });
+  }
+}
+
+// =================================================================
+// PING FEATURE
+// =================================================================
+const PING_STORAGE_KEY = 'cs_ai_pings_v1';
+const NAME_STORAGE_KEY = 'cs_ai_pinger_name_v1';
+
+function loadPings() {
+  try {
+    const raw = localStorage.getItem(PING_STORAGE_KEY);
+    if (!raw) return {};
+    const all = JSON.parse(raw);
+    // Auto-clear pings older than AUTO_CLEAR_MS
+    const now = Date.now();
+    const cleaned = {};
+    for (const [key, ping] of Object.entries(all)) {
+      if (now - ping.at < AUTO_CLEAR_MS) cleaned[key] = ping;
+    }
+    if (Object.keys(cleaned).length !== Object.keys(all).length) {
+      localStorage.setItem(PING_STORAGE_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
+  } catch (e) { return {}; }
+}
+function savePings(pings) {
+  try { localStorage.setItem(PING_STORAGE_KEY, JSON.stringify(pings)); } catch (e) {}
+}
+function getPing(clusterTitle) {
+  return loadPings()[clusterTitle] || null;
+}
+function setPing(clusterTitle, ping) {
+  const all = loadPings();
+  all[clusterTitle] = ping;
+  savePings(all);
+}
+function getPingerName() {
+  try { return localStorage.getItem(NAME_STORAGE_KEY) || null; } catch (e) { return null; }
+}
+function setPingerName(name) {
+  try { localStorage.setItem(NAME_STORAGE_KEY, name); } catch (e) {}
+}
+
+function refreshPingRows() {
+  document.querySelectorAll('[data-ping-row]').forEach(row => {
+    const title = row.getAttribute('data-cluster-title');
+    const ping = getPing(title);
+    const now = Date.now();
+    if (ping && now - ping.at < COOLDOWN_MS) {
+      // In cooldown — show badge
+      const ageMs = now - ping.at;
+      const ageStr = ageMs < 60000 ? 'just now' :
+        ageMs < 3600000 ? Math.floor(ageMs / 60000) + 'm ago' :
+        Math.floor(ageMs / 3600000) + 'h ago';
+      row.innerHTML = `<span class="ping-badge" title="Re-ping unlocks in 24h">🔔 Pinged ${esc(ageStr)} by ${esc(ping.by)}</span>`;
+    } else if (ping) {
+      // Past cooldown but within auto-clear — show muted indicator + allow re-ping
+      const days = Math.floor((now - ping.at) / 86400000);
+      row.innerHTML = `
+        <button class="ping-btn" data-action="ping">🔔 Re-ping for update</button>
+        <span style="margin-left:8px;font-size:11px;color:rgba(0,0,0,0.45);">last pinged ${days}d ago</span>
+      `;
+    } else {
+      row.innerHTML = `<button class="ping-btn" data-action="ping">🔔 Ping for update</button>`;
+    }
+  });
+}
+
+// Hook ping clicks (delegated)
+document.getElementById('board').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action="ping"]');
+  if (!btn) return;
+  e.stopPropagation();
+  const row = btn.closest('[data-ping-row]');
+  const clusterTitle = row.getAttribute('data-cluster-title');
+  startPingFlow(clusterTitle);
+});
+
+function startPingFlow(clusterTitle) {
+  const name = getPingerName();
+  if (!name) {
+    openNameModal(name => doPing(clusterTitle, name));
+  } else {
+    doPing(clusterTitle, name);
+  }
+}
+
+async function doPing(clusterTitle, name) {
+  // Find the cluster object
+  const cluster = CLUSTERS.find(c => c.title === clusterTitle);
+  if (!cluster) return;
+
+  const slackTs = CLUSTER_SLACK_TS[clusterTitle];
+  if (!slackTs) {
+    showToast('No Slack thread mapped for this issue.', true);
+    return;
+  }
+
+  // Optimistic UI
+  setPing(clusterTitle, { at: Date.now(), by: name });
+  refreshPingRows();
+
+  if (!WORKER_URL) {
+    showToast('Demo mode — ping recorded locally. Set up Cloudflare Worker to send to Slack.');
+    return;
+  }
+
+  try {
+    const dates = cluster.reports.map(r => parseDate(r.date)).filter(Boolean);
+    const lastDate = dates.length ? new Date(Math.max(...dates.map(d => d.getTime()))) : null;
+    const resp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cluster_title: cluster.title,
+        slack_ts: slackTs,
+        channel_id: SLACK_CHANNEL_ID,
+        pinger_name: name,
+        bulletin_url: BULLETIN_URL,
+        count: cluster.reports.length,
+        latest_date: lastDate ? lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—',
+        status: cluster.status
+      })
+    });
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '');
+      throw new Error('Slack post failed: ' + resp.status + ' ' + text);
+    }
+    showToast('✅ Pinged @channel in Slack.');
+  } catch (err) {
+    showToast('Ping recorded locally, but Slack message failed: ' + err.message, true);
+  }
+}
+
+// ---------- Name picker modal ----------
+let pendingPingCallback = null;
+
+function openNameModal(onConfirm) {
+  pendingPingCallback = onConfirm;
+  const sel = document.getElementById('name-select');
+  sel.innerHTML = '<option value="">— Choose your name —</option>' +
+    TEAM_MEMBERS.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  document.getElementById('name-confirm').disabled = true;
+  document.getElementById('name-modal').classList.add('show');
+  sel.focus();
+}
+function closeNameModal() {
+  document.getElementById('name-modal').classList.remove('show');
+  pendingPingCallback = null;
+}
+document.getElementById('name-select').addEventListener('change', (e) => {
+  document.getElementById('name-confirm').disabled = !e.target.value;
+});
+document.getElementById('name-cancel').addEventListener('click', closeNameModal);
+document.getElementById('name-confirm').addEventListener('click', () => {
+  const name = document.getElementById('name-select').value;
+  if (!name) return;
+  setPingerName(name);
+  const cb = pendingPingCallback;
+  closeNameModal();
+  if (cb) cb(name);
+});
+document.getElementById('name-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'name-modal') closeNameModal();
+});
+
+// ---------- Toast ----------
+let toastTimer = null;
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('error', !!isError);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4200);
+}
+
+// ---------- Wire it all up ----------
+wireUp();
+updateStatLine();
+render();
+refreshPingRows();
+// Refresh ping ages every minute (so "Pinged 4m ago" stays current)
+setInterval(refreshPingRows, 60000);
+</script>
+</body>
+</html>
